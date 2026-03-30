@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -c D:/skill/skill-builder.js)"
+    ]
+  }
+}
