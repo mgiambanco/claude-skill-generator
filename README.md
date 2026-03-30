@@ -9,10 +9,13 @@ A cross-platform interactive CLI for generating Claude Code skill files in the c
 ## Usage
 
 ```bash
-node skill-builder.js
+node skill-builder.js [--help] [--dry-run]
 ```
 
-The tool walks you through a series of prompts and writes a complete, valid `SKILL.md` file when finished.
+| Flag | Description |
+|------|-------------|
+| `--help`, `-h` | Print usage and exit |
+| `--dry-run` | Preview the generated file without saving it |
 
 ---
 
@@ -47,7 +50,7 @@ Version (default: 1.0.0):
 License (optional, e.g. "MIT"):
 ```
 
-- **Name** is required and becomes the `name` frontmatter field and the `# Title` heading. Use kebab-case (`my-skill`).
+- **Name** is required. Must be kebab-case (`my-skill`). Underscores and spaces are automatically normalized to hyphens; invalid characters produce a re-prompt.
 - **Version** defaults to `1.0.0` if left blank.
 - **License** is optional and omitted from the file if left blank.
 
@@ -79,7 +82,7 @@ Model override (optional):
 
 - **Argument hint** — shown to the user as a usage hint, e.g. `<path> [--verbose]`
 - **Allowed tools** — pre-approved tools that skip the permission prompt. Enter one per line (`Read`, `Grep`, `Bash`, …). Empty line to stop.
-- **Model override** — force a specific model: `haiku`, `sonnet`, or `opus`. Leave blank to use the default.
+- **Model override** — force a specific model: `haiku`, `sonnet`, or `opus`. Any other value triggers a re-prompt.
 
 ---
 
@@ -139,9 +142,19 @@ Type `y` to add a custom `## Heading` section. You can add as many as you like. 
 
 ---
 
-### 9. Preview
+### 9. Preview & Edit
 
-Before saving, the full generated `SKILL.md` is printed to the terminal so you can review it.
+Before saving, the full generated `SKILL.md` is printed to the terminal. You are then prompted:
+
+```
+Action — [s]ave / [e]dit a field / [q]uit:
+```
+
+- **s** — proceed to save
+- **e** — pick any field by name and re-enter it, then re-preview
+- **q** — abort without saving
+
+This lets you fix typos or revise content without starting over.
 
 ---
 
@@ -177,7 +190,8 @@ The output follows the canonical Claude Code SKILL.md spec:
 ```markdown
 ---
 name: skill-name
-description: When to invoke this skill (single line)
+type: model
+description: When to invoke this skill (single line, YAML-quoted if needed)
 version: 1.0.0
 license: MIT
 # user-invoked only:
@@ -209,7 +223,8 @@ model: sonnet
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `name` | Yes | Matches the skill directory name |
+| `name` | Yes | Kebab-case; matches the skill directory name |
+| `type` | Yes | `model` or `user` |
 | `description` | Yes | Trigger condition for model skills; `/help` text for user skills |
 | `version` | No | Semantic version, defaults to `1.0.0` |
 | `license` | No | Omitted if blank |
@@ -226,6 +241,8 @@ model: sonnet
 | Single-line | Press **Enter** |
 | Multiline | Type `---` on its own line and press **Enter** |
 | List (tools) | Press **Enter** on an empty line |
+
+Press **Ctrl+C** at any time to abort cleanly.
 
 ---
 
@@ -260,6 +277,17 @@ Provides structured code review feedback covering security, correctness, and sty
 ---
 
 ...
+
+Generated SKILL.md:
+────────────────────────────────────────────────────────────
+...
+────────────────────────────────────────────────────────────
+
+Action — [s]ave / [e]dit a field / [q]uit: s
+
+▶ Save File
+Save path (default: /home/user/code-reviewer-SKILL.md):
+~/.claude/plugins/my-plugin/skills/code-reviewer/SKILL.md
 
 ✓ Saved to: /home/user/.claude/plugins/my-plugin/skills/code-reviewer/SKILL.md
 ```
